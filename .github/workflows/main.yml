@@ -103,7 +103,21 @@ jobs:
       - name: Setup manifest path
         shell: bash
         run: |
-            echo "${{ env.manifests }}"
+          folder="/home/runner/work/_temp"
+
+          # Check if the folder exists
+          if [ -d "$folder" ]; then
+              # Loop through each file in the folder and perform 'cat'
+              for file in "$folder"/*; do
+                  if [ -f "$file" ]; then
+                      echo "Contents of $file:"
+                      cat "$file"
+                      echo "------------------------"
+                  fi
+              done
+          else
+              echo "Folder $folder does not exist."
+          fi
 
       - name: Azure Setup kubectl
         if: ${{ inputs.cloud == 'AKS' }}
