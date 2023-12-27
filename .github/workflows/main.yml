@@ -3,7 +3,6 @@ name: 'Action to deploy to GAE'
 
 on:
   workflow_call:
-
     inputs:
       module_name:
         description: 'Application module name'
