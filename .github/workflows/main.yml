@@ -73,7 +73,7 @@ jobs:
         if: ${{ inputs.deploy_tool == 'KUSTOMIZE' }}
         with:
           renderEngine: 'kustomize'
-          kustomizationPath: 'deploy/${{ inputs.environment }}/${{ inputs.deployment_type }}/'
+          kustomizationPath: 'deploy/${{ inputs.environment }}/aks/'
           kubectl-version: 'latest'
 
       - name: Bake Helm
