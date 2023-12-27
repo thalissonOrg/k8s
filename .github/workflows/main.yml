@@ -48,7 +48,7 @@ jobs:
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: .
-          file: ./Dockerfile
+          file: deploy/${{ inputs.environment }}/docker/Dockerfile
           push: true
           tags: ghcr.io/thalissonOrg/${{ github.sha }}
 
@@ -65,7 +65,7 @@ jobs:
         if: ${{ inputs.deploy_tool == 'KUSTOMIZE' }}
         with:
           renderEngine: 'kustomize'
-          kustomizationPath: 'dist/${{ inputs.environment }}/${{ inputs.deployment_type }}/'
+          kustomizationPath: 'deploy/${{ inputs.environment }}/${{ inputs.deployment_type }}/'
           kubectl-version: 'latest'
 
       - name: Bake Helm
@@ -74,7 +74,7 @@ jobs:
         if: ${{ inputs.deploy_tool == 'HELM' }}
         with:
           renderEngine: 'helm'
-          helmChart: 'dist/${{ inputs.environment }}/${{ inputs.deployment_type }}/'
+          helmChart: 'deploy/${{ inputs.environment }}/${{ inputs.deployment_type }}/'
           helm-version: 'latest'
           silent: 'false'
           namespace: ${{ inputs.namespace }}
@@ -89,7 +89,7 @@ jobs:
                 echo "manifests = ${{ steps.bake_helm.outputs.manifestsBundle }}" >> $GITHUB_ENV
              fi
              if [ ${{ inputs.deploy_tool }} == 'RAW' ]; then 
-                echo "manifests = dist/${{ inputs.environment }}/${{ inputs.deployment_type }}/" >> $GITHUB_ENV
+                echo "manifests = deploy/${{ inputs.environment }}/${{ inputs.deployment_type }}/" >> $GITHUB_ENV
              fi    
 
       - name: Setup manifest path
