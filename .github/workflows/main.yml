@@ -1,0 +1,115 @@
+name: 'Action to deploy to GAE'
+author: 'Equipa DevOps'
+description: 'Action to deploy to GAE'
+
+on:
+  workflow_call:
+
+  inputs:
+    module_name:
+      description: 'Application module name'
+      required: false  
+    environment:
+      description: 'Execution environment'
+    gae_auth_json:
+      description: 'Authentication file in GAE'
+    cloud:
+      description: 'Cloud provider/service'
+    version_suffix:
+      description: 'Version suffix'
+    deployment_type:
+      description: 'Deployment name type(aks,gke...)'
+    deploy_tool:
+      description: 'Deployment tool(KUSTOMIZE,RAW,HELM)'
+    namespace:
+      description: 'Namespace'
+    azure_credentials:
+      description: 'Azure credentials'
+    with_deploy:
+      description: 'If true allows for deployment on azure/google'
+
+
+jobs:
+  Publish:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/thalissonOrg/${{ github.sha }}
+
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4  
+  
+    
+      - name: Bake Kustomize
+        id: bake_kustomize
+        uses: azure/k8s-bake@v2.4
+        if: ${{ inputs.deploy_tool == 'KUSTOMIZE' }}
+        with:
+          renderEngine: 'kustomize'
+          kustomizationPath: 'dist/${{ inputs.environment }}/${{ inputs.deployment_type }}/'
+          kubectl-version: 'latest'
+
+      - name: Bake Helm
+        id: bake_helm
+        uses: azure/k8s-bake@v2.4
+        if: ${{ inputs.deploy_tool == 'HELM' }}
+        with:
+          renderEngine: 'helm'
+          helmChart: 'dist/${{ inputs.environment }}/${{ inputs.deployment_type }}/'
+          helm-version: 'latest'
+          silent: 'false'
+          namespace: ${{ inputs.namespace }}
+
+      - name: Setup manifest path
+        shell: bash
+        run: |
+             if [ ${{ inputs.deploy_tool }} == 'KUSTOMIZE' ]; then 
+                echo "manifests = ${{ steps.bake_kustomize.outputs.manifestsBundle }}" >> $GITHUB_ENV
+             fi
+             if [ ${{ inputs.deploy_tool }} == 'HELM' ]; then 
+                echo "manifests = ${{ steps.bake_helm.outputs.manifestsBundle }}" >> $GITHUB_ENV
+             fi
+             if [ ${{ inputs.deploy_tool }} == 'RAW' ]; then 
+                echo "manifests = dist/${{ inputs.environment }}/${{ inputs.deployment_type }}/" >> $GITHUB_ENV
+             fi    
+
+      - name: Setup manifest path
+        shell: bash
+        run: |
+            echo "${{ inputs.manifests }}"
+
+      - name: Azure Setup kubectl
+        if: ${{ inputs.cloud == 'AKS' }}
+        uses: azure/setup-kubectl@v2.0
+
+      - name: Deploy AKS
+        if: ${{ inputs.cloud == 'AKS' }}
+        uses: Azure/k8s-deploy@v4
+        with:
+          action: deploy
+          manifests: ${{ inputs.manifests }}
+
+      - name: Deploy GKE
+        if: ${{ inputs.cloud == 'GKE' }}
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          metadata: ${{ inputs.manifests }}
