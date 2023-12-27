@@ -58,7 +58,7 @@ jobs:
           context: .
           file: deploy/${{ inputs.environment }}/docker/Dockerfile
           push: true
-          tags: ghcr.io/thalissonOrg/${{ github.sha }}
+          tags: ghcr.io/thalissonorg/${{ github.sha }}
 
   Deploy:
     runs-on: ubuntu-latest
@@ -107,8 +107,8 @@ jobs:
 
           # Check if the folder exists
           if [ -d "$folder" ]; then
-              # Loop through each file in the folder and perform 'cat'
-              for file in "$folder"/*; do
+              # Loop through each file in the folder and perform 'cat' for YAML files
+              for file in "$folder"/*.yaml; do
                   if [ -f "$file" ]; then
                       echo "Contents of $file:"
                       cat "$file"
@@ -118,7 +118,7 @@ jobs:
           else
               echo "Folder $folder does not exist."
           fi
-
+          
       - name: Azure Setup kubectl
         if: ${{ inputs.cloud == 'AKS' }}
         uses: azure/setup-kubectl@v2.0
