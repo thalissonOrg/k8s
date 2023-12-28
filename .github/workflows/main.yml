@@ -51,11 +51,29 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
+ 
+      - name: Setup dockerfile on root
+        shell: bash
+        if: ${{ inputs.publish_cloud == 'true'}}
+        run: |
+          if [[ -d "./deploy/${{ inputs.environment }}/docker" ]]; then
+              cp -v ./deploy/${{ inputs.environment }}/docker/* .
+          else
+              echo "Error: Folder 'deploy/${{ inputs.environment }}/docker' does not exists."
+              exit 1
+          fi
+
+          if [[ -d "./target" ]]; then
+              cp -v -r ./target/* .
+          fi
+          
+          if [[ -d "./service.${{ inputs.module_name }}.serverside/target" ]]; then
+              cp -v -r ./service.${{ inputs.module_name }}.serverside/target/* .
+          fi 
 
       - name: Build and push Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
-          file: deploy/${{ inputs.environment }}/docker/Dockerfile
           push: true
           tags: ghcr.io/thalissonorg/${{ github.sha }}
           build-args: |
