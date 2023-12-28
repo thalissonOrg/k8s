@@ -59,6 +59,8 @@ jobs:
           file: deploy/${{ inputs.environment }}/docker/Dockerfile
           push: true
           tags: ghcr.io/thalissonorg/${{ github.sha }}
+          build-args: |
+            RELEASE_VERSION='build-artifact-6906658097'
 
   Deploy:
     runs-on: ubuntu-latest
@@ -118,7 +120,15 @@ jobs:
           else
               echo "Folder $folder does not exist."
           fi
-          
+
+      - name: Azure set context
+        if: ${{ inputs.cloud == 'AKS' }}
+        uses: azure/aks-set-context@v1
+        with:
+          creds: ${{ inputs.azure_credentials }}
+          resource-group: resource_group1
+          cluster-name: aks-deploy
+
       - name: Azure Setup kubectl
         if: ${{ inputs.cloud == 'AKS' }}
         uses: azure/setup-kubectl@v2.0
