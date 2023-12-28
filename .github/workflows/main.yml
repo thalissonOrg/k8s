@@ -54,7 +54,6 @@ jobs:
  
       - name: Setup dockerfile on root
         shell: bash
-        if: ${{ inputs.publish_cloud == 'true'}}
         run: |
           if [[ -d "./deploy/${{ inputs.environment }}/docker" ]]; then
               cp -v ./deploy/${{ inputs.environment }}/docker/* .
@@ -66,7 +65,7 @@ jobs:
           if [[ -d "./target" ]]; then
               cp -v -r ./target/* .
           fi
-          
+          ls -l
           if [[ -d "./service.${{ inputs.module_name }}.serverside/target" ]]; then
               cp -v -r ./service.${{ inputs.module_name }}.serverside/target/* .
           fi 
