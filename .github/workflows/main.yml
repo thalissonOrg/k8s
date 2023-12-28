@@ -59,7 +59,7 @@ jobs:
           push: true
           tags: ghcr.io/thalissonorg/${{ github.sha }}
           build-args: |
-            RELEASE_VERSION='6906658097'
+            RELEASE_VERSION=6906658097
 
   Deploy:
     runs-on: ubuntu-latest
