@@ -55,25 +55,25 @@ jobs:
       - name: Setup dockerfile on root
         shell: bash
         run: |
-          if [[ -d "./deploy/${{ inputs.environment }}/docker" ]]; then
-              cp -v ./deploy/${{ inputs.environment }}/docker/* .
+          if [[ -d "./tmd/deploy/${{ inputs.environment }}/docker" ]]; then
+              cp -v ./tmd/deploy/${{ inputs.environment }}/docker/* .
           else
               echo "Error: Folder 'deploy/${{ inputs.environment }}/docker' does not exists."
               exit 1
           fi
 
-          if [[ -d "./target" ]]; then
-              cp -v -r ./target/* .
+          if [[ -d "./tmd/target" ]]; then
+              cp -v -r ./tmd/target/* .
           fi
           
-          if [[ -d "./service.${{ inputs.module_name }}.serverside/target" ]]; then
-              cp -v -r ./service.${{ inputs.module_name }}.serverside/target/* .
+          if [[ -d "./tmd/service.${{ inputs.module_name }}.serverside/target" ]]; then
+              cp -v -r ./tmd/service.${{ inputs.module_name }}.serverside/target/* .
           fi 
 
       - name: Build and push Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
-          context: .
+          context: ./tmd
           push: true
           tags: ghcr.io/thalissonorg/${{ github.sha }}
           build-args: |
