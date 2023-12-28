@@ -55,12 +55,12 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
-          file: deploy/${{ inputs.environment }}/docker/Dockerfile
+          file: Dockerfile
           push: true
           tags: ghcr.io/thalissonorg/${{ github.sha }}
           build-args: |
             RELEASE_VERSION=6906658097
-            PATH=deploy/${{ inputs.environment }}/docker
+            PATH=deploy/${{ inputs.environment }}/docker    
 
   Deploy:
     runs-on: ubuntu-latest
