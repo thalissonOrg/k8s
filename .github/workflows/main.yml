@@ -53,6 +53,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Setup dockerfile on root
+        if: ${{ inputs.deploy_tool == 'KUSTOMIZE' }}
         shell: bash
         run: |
           if [[ -d "./tmd/deploy/${{ inputs.environment }}/docker" ]]; then
@@ -76,11 +77,12 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
-          context: "{{defaultContext}}:tmd"
+          context: .
           push: true
           tags: ghcr.io/thalissonorg/${{ github.sha }}
           build-args: |
             RELEASE_VERSION=69066580971
+          file: tmd/deploy/${{ inputs.environment }}/docker/Dockerfile
 
   Deploy:
     runs-on: ubuntu-latest
