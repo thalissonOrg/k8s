@@ -55,12 +55,12 @@ jobs:
       - name: Setup docker folder
         shell: bash
         run: |
-          if [[ -d "./${{ inputs.module_name }}/target" ]]; then
-              cp -v -r ./${{ inputs.module_name }}/target/* .
+          if [[ -d "${{ inputs.module_name }}/target" ]]; then
+              cp -v -r ${{ inputs.module_name }}/target/* .
           fi
-          cp -v -r ./${{ inputs.module_name }}/deploy/${{ inputs.environment }}/docker/* .
-          if [[ -d "./${{ inputs.module_name }}/service.${{ inputs.module_name }}.serverside/target" ]]; then
-              cp -v -r ./${{ inputs.module_name }}/service.${{ inputs.module_name }}.serverside/target/* .
+          cp -v -r ${{ inputs.module_name }}/deploy/${{ inputs.environment }}/docker/* .
+          if [[ -d "${{ inputs.module_name }}/service.${{ inputs.module_name }}.serverside/target" ]]; then
+              cp -v -r ${{ inputs.module_name }}/service.${{ inputs.module_name }}.serverside/target/* .
           fi 
   
 
