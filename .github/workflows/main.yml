@@ -55,14 +55,14 @@ jobs:
       - name: Setup docker folder
         shell: bash
         run: |
-          if [[ -d "./tmd/target" ]]; then
-              cp -v -r ./tmd/target/* .
+          if [[ -d "./${{ inputs.module_name }}/target" ]]; then
+              cp -v -r ./${{ inputs.module_name }}/target/* .
           fi
-          cp -v -r ./tmd/deploy/${{ inputs.environment }}/docker/* .
-          if [[ -d "./tmd/service.${{ inputs.module_name }}.serverside/target" ]]; then
-              cp -v -r ./tmd/service.${{ inputs.module_name }}.serverside/target/* .
+          cp -v -r ./${{ inputs.module_name }}/deploy/${{ inputs.environment }}/docker/* .
+          if [[ -d "./${{ inputs.module_name }}/service.${{ inputs.module_name }}.serverside/target" ]]; then
+              cp -v -r ./${{ inputs.module_name }}/service.${{ inputs.module_name }}.serverside/target/* .
           fi 
-          ls -l
+  
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -90,7 +90,7 @@ jobs:
         if: ${{ inputs.deploy_tool == 'KUSTOMIZE' }}
         with:
           renderEngine: 'kustomize'
-          kustomizationPath: 'deploy/${{ inputs.environment }}/aks/'
+          kustomizationPath: '${{ inputs.module_name }}/deploy/${{ inputs.environment }}/aks/'
           kubectl-version: 'latest'
 
       - name: Bake Helm
@@ -99,7 +99,7 @@ jobs:
         if: ${{ inputs.deploy_tool == 'HELM' }}
         with:
           renderEngine: 'helm'
-          helmChart: 'deploy/${{ inputs.environment }}/${{ inputs.deployment_type }}/'
+          helmChart: '${{ inputs.module_name }}/deploy/${{ inputs.environment }}/${{ inputs.deployment_type }}/'
           helm-version: 'latest'
           silent: 'false'
           namespace: ${{ inputs.namespace }}
