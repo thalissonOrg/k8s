@@ -63,6 +63,8 @@ jobs:
           if [[ -d "./tmd/service.${{ inputs.module_name }}.serverside/target" ]]; then
               cp -v -r ./tmd/service.${{ inputs.module_name }}.serverside/target/* ./tmd/deploy/${{ inputs.environment }}/docker
           fi 
+          cd  ./tmd/deploy/${{ inputs.environment }}/docker
+          ls -l
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
