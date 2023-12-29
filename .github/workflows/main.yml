@@ -72,7 +72,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/thalissonorg/${{ github.sha }}
+          tags: ghcr.io/thalissonorg/${{ github.sha }}:${{ inputs.module_name }}
           build-args: |
             RELEASE_VERSION=69066580971
     
