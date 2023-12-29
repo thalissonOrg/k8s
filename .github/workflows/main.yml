@@ -56,19 +56,12 @@ jobs:
         if: ${{ inputs.deploy_tool == 'KUSTOMIZE' }}
         shell: bash
         run: |
-          if [[ -d "./tmd/deploy/${{ inputs.environment }}/docker" ]]; then
-              cp -v ./tmd/deploy/${{ inputs.environment }}/docker/* .
-          else
-              echo "Error: Folder 'deploy/${{ inputs.environment }}/docker' does not exists."
-              exit 1
-          fi
-
           if [[ -d "./tmd/target" ]]; then
-              cp -v -r ./tmd/target/* .
+              cp -v -r ./tmd/target/* ./tmd/deploy/${{ inputs.environment }}/docker
           fi
           
           if [[ -d "./tmd/service.${{ inputs.module_name }}.serverside/target" ]]; then
-              cp -v -r ./tmd/service.${{ inputs.module_name }}.serverside/target/* .
+              cp -v -r ./tmd/service.${{ inputs.module_name }}.serverside/target/* ./tmd/deploy/${{ inputs.environment }}/docker
           fi 
 
       - name: Set up Docker Buildx
