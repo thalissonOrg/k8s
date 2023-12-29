@@ -52,8 +52,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Setup dockerfile on root
-        if: ${{ inputs.deploy_tool == 'KUSTOMIZE' }}
+      - name: Setup docker folder
         shell: bash
         run: |
           if [[ -d "./tmd/target" ]]; then
