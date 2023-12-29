@@ -8,6 +8,7 @@ on:
         description: 'Application module name'
         required: false  
         type: string
+        default: '.'
       environment:
         description: 'Execution environment'
         type: string
@@ -51,14 +52,26 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
+        
+      - name: Setup image name
+        id: vars_setup
+        shell: bash
+        run: |       
+          echo  "module_image_name=test" >> $GITHUB_ENV       
 
+      - name: Create image env var
+        shell: bash
+        run: |
+           ${{ env.module_image_name }} = ${{ inputs.module_name }}
+           echo "${{ env.module_image_name }}"
+                  
       - name: Setup docker folder
         shell: bash
         run: |
+          cp -v -r ${{ inputs.module_name }}/deploy/${{ inputs.environment }}/docker/* .
           if [[ -d "${{ inputs.module_name }}/target" ]]; then
               cp -v -r ${{ inputs.module_name }}/target/* .
           fi
-          cp -v -r ${{ inputs.module_name }}/deploy/${{ inputs.environment }}/docker/* .
           if [[ -d "${{ inputs.module_name }}/service.${{ inputs.module_name }}.serverside/target" ]]; then
               cp -v -r ${{ inputs.module_name }}/service.${{ inputs.module_name }}.serverside/target/* .
           fi 
