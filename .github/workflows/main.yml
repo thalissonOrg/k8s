@@ -56,12 +56,13 @@ jobs:
         shell: bash
         run: |
           if [[ -d "./tmd/target" ]]; then
-              cp -v -r ./tmd/target/* ./tmd/deploy/${{ inputs.environment }}/docker
+              cp -v -r ./tmd/target/* .
           fi
           
           if [[ -d "./tmd/service.${{ inputs.module_name }}.serverside/target" ]]; then
-              cp -v -r ./tmd/service.${{ inputs.module_name }}.serverside/target/* ./tmd/deploy/${{ inputs.environment }}/docker
+              cp -v -r ./tmd/service.${{ inputs.module_name }}.serverside/target/* .
           fi 
+          ls -l
           cd  ./tmd/deploy/${{ inputs.environment }}/docker
           ls -l
 
