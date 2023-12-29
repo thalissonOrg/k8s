@@ -58,7 +58,7 @@ jobs:
           if [[ -d "./tmd/target" ]]; then
               cp -v -r ./tmd/target/* .
           fi
-          cp -v -r ./tmd/deploy/${{ inputs.environment }}/docker .
+          cp -v -r ./tmd/deploy/${{ inputs.environment }}/docker/* .
           if [[ -d "./tmd/service.${{ inputs.module_name }}.serverside/target" ]]; then
               cp -v -r ./tmd/service.${{ inputs.module_name }}.serverside/target/* .
           fi 
