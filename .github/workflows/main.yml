@@ -33,6 +33,7 @@ jobs:
           repository: thalissonorg/workflow
           ref: main
           token: ${{ github.token }}
+          path: tmp/
 
       - name: list files
         shell: bash    
