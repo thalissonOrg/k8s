@@ -48,6 +48,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           tags: ghcr.io/github-edp/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          file: ${{ inputs.module_name }}/Dockerfile
           
 
       - name: Push Image
@@ -55,3 +56,4 @@ jobs:
         with:
           push: true
           tags: ghcr.io/github-edp/${{ env.IMAGE_NAME }}${{ env.TAG }}
+          file: ${{ inputs.module_name }}/Dockerfile
