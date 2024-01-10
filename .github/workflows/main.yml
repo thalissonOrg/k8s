@@ -38,6 +38,7 @@ jobs:
       - name: list files
         shell: bash    
         run: |
+            cd tmp
             ls -l
 
       - name: Login to GitHub Container Registry
