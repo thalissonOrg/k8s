@@ -1,175 +1,57 @@
-name: 'Action to deploy to GAE'
-
+name: Docker build && publish
 
 on:
   workflow_call:
     inputs:
-      module_name:
-        description: 'Application module name'
-        required: false  
+      imageName:
         type: string
-        default: '.'
-      environment:
-        description: 'Execution environment'
+        description: 'Name of the Image pushed to registry'
+        required: true
+      imageTag:
         type: string
-      gae_auth_json:
-        description: 'Authentication file in GAE'
-        type: string
-      cloud:
-        description: 'Cloud provider/service'
-        type: string
-      version_suffix:
-        description: 'Version suffix'
-        type: string
-      deployment_type:
-        description: 'Deployment name type(aks,gke...)'
-        type: string
-      deploy_tool:
-        description: 'Deployment tool(KUSTOMIZE,RAW,HELM)'
-        type: string
-      namespace:
-        description: 'Namespace'
-        type: string
-      azure_credentials:
-        description: 'Azure credentials'
-        type: string
-      with_deploy:
-        description: 'If true allows for deployment on azure/google'
-        type: string
-
+        description: 'Tag of the Image pushed to registry'
 
 jobs:
-  Publish:
-    name: Push Docker image to Docker Hub
+  build-push:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-      
-      - name: Log in to Docker Hub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+      - name: Checkout code
+        uses: actions/checkout@v4  
+
+      - name: Lint Dockerfile
+        run: docker run --rm -i hadolint/hadolint < Dockerfile
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
-        
-      - name: Setup image name
-        id: vars_setup
-        shell: bash
-        run: |       
-          echo  "module_image_name=test" >> $GITHUB_ENV       
 
-      - name: Create image env var
-        shell: bash
-        run: |
-           echo  "module_image_name=${{ inputs.module_name }}" >> $GITHUB_ENV   
-           echo "${{ env.module_image_name }}"
-                  
-      - name: Setup docker folder
-        shell: bash
-        run: |
-          cp -v -r ${{ inputs.module_name }}/deploy/${{ inputs.environment }}/docker/* .
-          if [[ -d "${{ inputs.module_name }}/target" ]]; then
-              cp -v -r ${{ inputs.module_name }}/target/* .
-          fi
-          if [[ -d "${{ inputs.module_name }}/service.${{ inputs.module_name }}.serverside/target" ]]; then
-              cp -v -r ${{ inputs.module_name }}/service.${{ inputs.module_name }}.serverside/target/* .
-          fi 
-  
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/thalissonorg/${{ github.sha }}:${{ inputs.module_name }}
-          build-args: |
-            RELEASE_VERSION=69066580971
-    
-
-  Deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4  
-  
-    
-      - name: Bake Kustomize
-        id: bake_kustomize
-        uses: azure/k8s-bake@v2.4
-        if: ${{ inputs.deploy_tool == 'KUSTOMIZE' }}
-        with:
-          renderEngine: 'kustomize'
-          kustomizationPath: '${{ inputs.module_name }}/deploy/${{ inputs.environment }}/aks/'
-          kubectl-version: 'latest'
-
-      - name: Bake Helm
-        id: bake_helm
-        uses: azure/k8s-bake@v2.4
-        if: ${{ inputs.deploy_tool == 'HELM' }}
-        with:
-          renderEngine: 'helm'
-          helmChart: '${{ inputs.module_name }}/deploy/${{ inputs.environment }}/${{ inputs.deployment_type }}/'
-          helm-version: 'latest'
-          silent: 'false'
-          namespace: ${{ inputs.namespace }}
-
-      - name: Setup manifest path
-        shell: bash
-        run: |
-             if [ ${{ inputs.deploy_tool }} == 'KUSTOMIZE' ]; then 
-                echo "manifests = ${{ steps.bake_kustomize.outputs.manifestsBundle }}" >> $GITHUB_ENV
-             fi
-             if [ ${{ inputs.deploy_tool }} == 'HELM' ]; then 
-                echo "manifests = ${{ steps.bake_helm.outputs.manifestsBundle }}" >> $GITHUB_ENV
-             fi
-             if [ ${{ inputs.deploy_tool }} == 'RAW' ]; then 
-                echo "manifests = deploy/${{ inputs.environment }}/${{ inputs.deployment_type }}/" >> $GITHUB_ENV
-             fi    
-
-      - name: Setup manifest path
-        shell: bash
-        run: |
-          folder="/home/runner/work/_temp"
-
-          # Check if the folder exists
-          if [ -d "$folder" ]; then
-              # Loop through each file in the folder and perform 'cat' for YAML files
-              for file in "$folder"/*.yaml; do
-                  if [ -f "$file" ]; then
-                      echo "Contents of $file:"
-                      cat "$file"
-                      echo "------------------------"
-                  fi
-              done
+      - name: Prepare Package Name
+        run: |   
+          IMAGE_NAME=$(echo ${{ inputs.imageName }} | tr '[:upper:]' '[:lower:]')
+          if [ -n "${{ inputs.imageTag }}" ]; then
+            TAG=":${{ inputs.imageTag }}"
           else
-              echo "Folder $folder does not exist."
+            TAG=""
           fi
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+          echo "TAG=$TAG" >> $GITHUB_ENV
 
-      - name: Azure set context
-        if: ${{ inputs.cloud == 'AKS' }}
-        uses: azure/aks-set-context@v1
+      - name: Build Docker Image
+        uses: docker/build-push-action@v5
         with:
-          creds: ${{ inputs.azure_credentials }}
-          resource-group: resource_group1
-          cluster-name: aks-deploy
+          tags: ghcr.io/github-edp/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          
 
-      - name: Azure Setup kubectl
-        if: ${{ inputs.cloud == 'AKS' }}
-        uses: azure/setup-kubectl@v2.0
-
-      - name: Deploy AKS
-        if: ${{ inputs.cloud == 'AKS' }}
-        uses: Azure/k8s-deploy@v4
+      - name: Push Image
+        uses: docker/build-push-action@v5
         with:
-          action: deploy
-          manifests: ${{ env.manifests }}
-
-      - name: Deploy GKE
-        if: ${{ inputs.cloud == 'GKE' }}
-        uses: google-github-actions/deploy-cloudrun@v2
-        with:
-          metadata: ${{ env.manifests }}
+          push: true
+          tags: ghcr.io/github-edp/${{ env.IMAGE_NAME }}${{ env.TAG }}
