@@ -85,4 +85,4 @@ jobs:
         with:
           push: true
           context: ${{ inputs.module_name }}/
-          tags: ghcr.io/github-edp/${{ env.IMAGE_NAME }}${{ env.TAG }}
+          tags: ghcr.io/github-edp/${{ env.IMAGE_NAME }}:${{ env.TAG }}
