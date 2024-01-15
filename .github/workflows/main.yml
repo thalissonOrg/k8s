@@ -49,9 +49,10 @@ jobs:
           password: ${{ github.token }}
 
       - name: Set module vars
+        id: vars_setup
         shell: bash
         run: |       
-          echo  "release_version=${{ inputs.module_name }} " >> $GITHUB_ENV  
+          echo  "release_version=$(${{ inputs.module_name }})" >> $GITHUB_ENV  
           
           if [ -f "$json_file" ]; then
             jq --argjson RELEASE_VERSION "${{ env.release_version }}" '. + {("RELEASE_VERSION"): ${{ env.release_version }}}' --in-place "Build_args.json"
