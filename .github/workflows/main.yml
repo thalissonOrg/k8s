@@ -76,7 +76,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ${{ inputs.module_name }}/
-          tags: ghcr.io/github-edp/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          tags: ghcr.io/github-edp/${{ env.IMAGE_NAME }}:${{ env.TAG }}
  
           
 
