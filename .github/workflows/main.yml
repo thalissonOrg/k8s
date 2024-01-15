@@ -54,7 +54,7 @@ jobs:
         run: |       
           release_version=$(echo "${{ inputs.imageName }}" | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
           if [ -f "Build_args.json" ]; then
-  
+            temp_file=$(mktemp)
             jq --arg RELEASE_VERSION "$release_version-${{ inputs.imageName }}" '. + {("RELEASE_VERSION"): $RELEASE_VERSION}' "Build_args.json" > "$temp_file" && mv "$temp_file" "Build_args.json"
           fi
           cat Build_args.json
