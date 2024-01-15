@@ -64,7 +64,7 @@ jobs:
         with:
           context: ${{ inputs.module_name }}/
           tags: ghcr.io/github-edp/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          file: ${{ inputs.module_name }}/Dockerfile
+ 
           
 
       - name: Push Image
@@ -73,4 +73,3 @@ jobs:
           push: true
           context: ${{ inputs.module_name }}/
           tags: ghcr.io/github-edp/${{ env.IMAGE_NAME }}${{ env.TAG }}
-          file: ${{ inputs.module_name }}/Dockerfile
