@@ -56,7 +56,7 @@ jobs:
           echo "release_version=$release_versions" >> $GITHUB_ENV
           echo ${{ env.release_version }}
           if [ -f "Build_args.json" ]; then
-            jq --argjson RELEASE_VERSION "test" '. + {("RELEASE_VERSION"): test}' --in-place "Build_args.json"
+            jq --argjson RELEASE_VERSION "test" '. + {("RELEASE_VERSION"): $RELEASE_VERSION}' --in-place "Build_args.json"
           fi
           cat Build_args.json
         working-directory: ${{ inputs.module_name }}  
