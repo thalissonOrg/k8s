@@ -48,6 +48,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
+      - name: Set module vars
+        id: vars_setup
+        shell: bash
+        if: ${{ inputs.publish_cloud == true }}
+        run: |       
+          echo  "release_version=test" >> $GITHUB_ENV  
+          
+          if [ -f "$json_file" ]; then
+            jq --argjson RELEASE_VERSION "${{ env.release_version }}" '. + {("RELEASE_VERSION"): ${{ env.release_version }}}' --in-place "Build_args.json"
+          fi
+          cat Build_args.json
+        working-directory: ${{ inputs.module_name }}  
+        
+
       - name: Prepare Package Name
         run: |   
           IMAGE_NAME=$(echo ${{ inputs.imageName }} | tr '[:upper:]' '[:lower:]')
