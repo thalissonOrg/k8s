@@ -49,9 +49,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Set module vars
-        id: vars_setup
         shell: bash
-        if: ${{ inputs.publish_cloud == true }}
         run: |       
           echo  "release_version=test" >> $GITHUB_ENV  
           
