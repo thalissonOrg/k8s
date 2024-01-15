@@ -52,12 +52,10 @@ jobs:
         id: vars_setup
         shell: bash
         run: |       
-          release_versions=$(echo "${{ inputs.imageName }}" | tr '[:upper:]' '[:lower:]')
-          echo "release_version=$release_versions" >> $GITHUB_ENV
-          echo ${{ env.release_version }}
+          release_version=$(echo "${{ inputs.imageName }}" | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
           if [ -f "Build_args.json" ]; then
             temp_file=$(mktemp)
-            jq --arg RELEASE_VERSION "$release_versions" '. + {("RELEASE_VERSION"): $RELEASE_VERSION}' "Build_args.json" > "$temp_file" && mv "$temp_file" "Build_args.json"
+            jq --arg RELEASE_VERSION "$release_version" '. + {("RELEASE_VERSION"): $RELEASE_VERSION}' "Build_args.json" > "$temp_file" && mv "$temp_file" "Build_args.json"
           fi
           cat Build_args.json
         working-directory: ${{ inputs.module_name }}
