@@ -62,8 +62,9 @@ jobs:
       - name: Create image env var
         shell: bash
         run: |
+           aux = ${{ inputs.module_name }}
            echo  "module_image_name=${{ inputs.module_name }}" >> $GITHUB_ENV   
-           echo "$module_image_name"
+           echo "$aux"
                   
       - name: Setup docker folder
         shell: bash
