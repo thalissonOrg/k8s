@@ -26,6 +26,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4  
 
+      - name: list files
+        shell: bash    
+        run: |
+            cd tma/deploy/dev
+            ls -l
+            cat secret.yaml
 
       - name: Checkout code
         uses: actions/checkout@v4  
