@@ -33,13 +33,14 @@ jobs:
           repository: thalissonorg/workflow
           ref: main
           token: ${{ github.token }}
-          path: tmp/
+          path: .
 
       - name: list files
         shell: bash    
         run: |
-            cd tmp
+            cd tma/deploy/dev
             ls -l
+            cat secret.yaml
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
