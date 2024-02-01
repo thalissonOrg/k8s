@@ -15,7 +15,29 @@ on:
         description: 'Tag of the Image pushed to registry'
 
 jobs:
+  build:
+    if: ${{ inputs.imageTag == 'teste' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4  
+
+      - name: list files
+        shell: bash    
+        run: |
+            cd tma/deploy/dev/aks
+            ls -l
+            cat secret.yaml
+
+
+
   build-push:
+    if: ${{ inputs.imageTag == 'teste2' }}
     runs-on: ubuntu-latest
 
     permissions:
